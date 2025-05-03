@@ -1,0 +1,23 @@
+/* frontend/src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap');
+html, body {
+  background: none; /* background set via Box */
+  transition: background 0.3s ease;
+}
+body { margin: 0; font-family: 'Segoe UI', sans-serif; }
+
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+.header h1 {
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.header p {
+  color: rgba(0, 0, 0, 0.7);
+}
