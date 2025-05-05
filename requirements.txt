@@ -1,10 +1,8 @@
 fastapi
 uvicorn
 numpy
-scikit-learn
-torch
 esm
 numpy
 pandas
-fastparquet
+pyarrow
 biopython

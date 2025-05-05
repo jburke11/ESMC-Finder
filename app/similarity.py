@@ -3,16 +3,15 @@ from esm.sdk.api import ESMProtein, LogitsConfig
 import numpy as np
 
 logit_config = LogitsConfig(sequence=True, return_embeddings=True)
-
+client = ESMC.from_pretrained("esmc_300m")
 
 def embed_sequence(sequence: str) -> np.ndarray:
-    client = ESMC.from_pretrained("esmc_300m")
     protein = ESMProtein(sequence=sequence)
     protein_tensor = client.encode(protein)
     logits_output = client.logits(
         protein_tensor, LogitsConfig(sequence=True, return_embeddings=True)
     )
-    return logits_output.embeddings[0].mean(axis=0).squeeze().cpu().numpy()
+    return logits_output.embeddings[0].mean(axis=0).numpy()
 
 def cosine_similarity(query_vec: np.ndarray, db_vecs: np.ndarray) -> np.ndarray:
     db_vecs_norm = db_vecs / (np.linalg.norm(db_vecs, axis=1, keepdims=True))

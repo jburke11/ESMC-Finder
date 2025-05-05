@@ -2,7 +2,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from app.similarity import get_top_k_similar
-from app.utils import load_embeddings, load_metadata, compute_sequence_identity
+from app.utils import load_embeddings, load_metadata, compute_sequence_identity, get_uniprot_sequences
+from datetime import datetime as time
 
 app = FastAPI()
 
@@ -15,8 +16,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-embeddings = load_embeddings("app/data/protein_embeddings.npy")
+embeddings = load_embeddings("app/data/data.dat")
 uniprot_metadata = load_metadata("app/data/uniprot_metadata.parquet")
+
 
 class SequenceQuery(BaseModel):
     sequence: str
@@ -34,6 +36,7 @@ def recommend_sequence():
 
 @app.post("/recommend-sequence")
 def recommend_sequence(query: SequenceQuery):
+    start = time.now()
     if not query.sequence:
         raise HTTPException(status_code=400, detail="Missing protein sequence")
     if len(query.sequence) > 1000:
@@ -46,18 +49,20 @@ def recommend_sequence(query: SequenceQuery):
     if len(similar_prots) == 0:
         raise HTTPException(status_code=404, detail="No similar sequences found")
     results = []
+    uniprot_seqs = get_uniprot_sequences(uniprot_metadata["Entry Name"][similar_prots].tolist())
     for i, embedding_index in enumerate(similar_prots):
         prot_id = uniprot_metadata["Entry Name"][embedding_index]
         sim_score = float(scores[i])
         # Fetch Pfam terms from metadata
         pfam_terms = uniprot_metadata["Pfam"][embedding_index]
-        pfam_links = [f"https://www.ebi.ac.uk/interpro/entry/pfam/{pfam}" for pfam in pfam_terms] if pfam_terms else []
+        pfam_links = [f"https://www.ebi.ac.uk/interpro/entry/pfam/{pfam}" for pfam in pfam_terms] if pfam_terms is not None else []
         results.append({
             "id": prot_id,
             "id_link": f"https://www.uniprot.org/uniprot/{prot_id}/entry",
             "similarity": sim_score,
-            "identity": compute_sequence_identity(query.sequence, uniprot_metadata['Sequence'][embedding_index]),
-            "pfam": pfam_terms if pfam_terms else [],
+            "identity": compute_sequence_identity(query.sequence, uniprot_seqs[uniprot_seqs["Entry Name"] == prot_id]["Sequence"].values[0]),
+            "pfam": pfam_terms.tolist() if pfam_terms is not None else [],
             "pfam_links": pfam_links,
         })
+    print(f"Processing time: {time.now() - start}")
     return {"results": results}

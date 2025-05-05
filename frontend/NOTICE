@@ -1,0 +1,11 @@
+This project integrates the ESMC 300M model by EvolutionaryScale.
+
+Modifications:
+- ESM embeddings used for similarity search
+- Custom frontend and backend pipeline for web-based access
+
+Attribution:
+- Built with ESM
+- Outputs labeled as "Generated with ESM"
+
+See: https://www.evolutionaryscale.ai/policies/cambrian-open-license-agreement

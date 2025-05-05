@@ -95,8 +95,8 @@ export default function App() {
         </Link>
       )
     },
-    { field: 'similarity', headerName: 'Cosine Similarity', type: 'number', flex: 1 },
-    { field: 'identity', headerName: 'Sequence Identity (%)', type: 'number', flex: 1 },
+    { field: 'similarity', headerName: 'Cosine Similarity', type: 'number', flex: 1, description: 'Similarity between embeddings (-1 to 1)' },
+    { field: 'identity', headerName: 'Sequence Identity (%)', type: 'number', flex: 1, description: 'Percentage of shared amino acids between sequences' },
     {
       field: 'pfam',
       headerName: 'Pfam Domains',
@@ -119,7 +119,7 @@ export default function App() {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:8080/recommend-sequence', {
+      const res = await fetch('https://app-510117665463.us-east1.run.app/recommend-sequence', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sequence, top_k: topK }),
@@ -142,7 +142,7 @@ export default function App() {
       <Box sx={{ flexGrow: 1, mb: 2 }}>
         <AppBar position="sticky" elevation={1}>
           <Toolbar>
-            <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>Protein Similarity Search</Typography>
+            <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>ESMFinder</Typography>
             <FormControlLabel
               control={
                 <Switch
@@ -157,17 +157,47 @@ export default function App() {
         </AppBar>
       </Box>
       <Box sx={{
+        position: 'relative',
         minHeight: '100vh',
         background: darkMode
           ? 'linear-gradient(135deg, #0d1117, #1f1f1f)'
           : 'linear-gradient(135deg, #e3f2fd, #ffffff)',
         py: 4,
       }}>
+        {loading && (
+          <Box sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(255, 255, 255, 0.6)',
+            zIndex: 10,
+          }} />
+        )}
         <Container maxWidth="lg" sx={{ mb: 2, px: 2 }}>
+          <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+            <Typography variant="h5" gutterBottom>
+              What is ESMFinder?
+            </Typography>
+            <Typography variant="body1" paragraph>
+              ESMFinder is a protein similarity search tool that leverages embeddings from the ESMC 300M model. 
+              It allows users to input a protein sequence and retrieve the top-k most similar proteins from the UniProtKB/Swiss-Prot database, 
+              based on the cosine similarity between their ESM embeddings.
+            </Typography>
+            <Typography variant="body1" paragraph>
+              To use ESMFinder, paste your protein sequence into the input box, optionally adjust the number of top results, 
+              and click "Search". The results will include UniProt IDs, cosine similarity scores, sequence identity percentages, 
+              and links to associated Pfam domains.
+            </Typography>
+            <Typography variant="body1" paragraph>
+              This project was built with ESM and in accordance with the <a href='https://www.evolutionaryscale.ai/policies/cambrian-open-license-agreement'>Cambrian Open License Agreement (COLA)</a>.
+            </Typography>
+          </Paper>
           <Paper sx={{ p: 4, mb: 3, borderRadius: 2 }}>
             <form onSubmit={handleSubmit}>
               <TextField
-                label="Protein Sequence"
+                label="Enter Protein Sequence"
                 placeholder="MKTLLVLL..."
                 multiline
                 fullWidth
@@ -177,7 +207,12 @@ export default function App() {
                 error={!!error}
                 helperText={error}
               />
-              <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ mt: 3, display: 'flex', alignItems: 'center', gap: 3 }}>
+              <Button onClick={() => setSequence('MALWMRLLPLLALLALWGPDPAAAFVNQHLCGSHLVEALYLVCGERGFFYTPKTRREAEDLQVGQVELGGGPGAGSLQPLALEGSLQKRGIVEQCCTSICSLYQLENYCN')} variant='contained'>
+                  Load Example
+                </Button>
+              </Box>
+              <Box sx={{ mt: 3, display: 'flex', alignItems: 'center', gap: 3 }}>
                 <TextField
                   label="Top K"
                   type="number"
@@ -198,18 +233,52 @@ export default function App() {
             </form>
           </Paper>
           {rows.length > 0 && (
-            <Paper sx={{ p: 2, borderRadius: 2, mb: 4, height: 400, width: '100%' }}>
-              <DataGrid
-                rows={rows}
-                columns={columns}
-                pageSize={5}
-                rowsPerPageOptions={[5]}
-                disableSelectionOnClick
-              />
-            </Paper>
+            <>
+              <Box sx={{ mb: 2, textAlign: 'right' }}>
+                <Button variant="contained" onClick={() => {
+                  const csv = rows.map(r => {
+                    const pfam = r.pfam.join(';');
+                    return `${r.id},${r.similarity},${r.identity},${pfam}`;
+                  });
+                  const header = "UniProt ID,Cosine Similarity,Sequence Identity (%),Pfam Domains";
+                  const blob = new Blob([header + "\n" + csv.join("\n")], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.setAttribute('download', 'esmfinder_results.csv');
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}>
+                  Download Results
+                </Button>
+              </Box>
+              <Paper sx={{ p: 2, borderRadius: 2, mb: 4, height: 400, width: '100%' }}>
+                <DataGrid
+                  rows={rows}
+                  columns={columns}
+                  pageSize={5}
+                  rowsPerPageOptions={[5]}
+                  disableSelectionOnClick
+                />
+              </Paper>
+            </>
           )}
         </Container>
       </Box>
+      <footer style={{ textAlign: 'center', padding: '1rem', opacity: 0.7 }}>
+        <Box display="flex" justifyContent="center" gap={2}>
+          <Link href="https://github.com/jburke11/ESMC-Finder" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width="24" height="24" />
+          </Link>
+          <Link href="https://www.linkedin.com/in/josephburke11/" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" alt="LinkedIn" width="24" height="24" />
+          </Link>
+        </Box>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          Created by Joseph Burke
+          </Typography>
+      </footer>
     </ThemeProvider>
   )
 }
