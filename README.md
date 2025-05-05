@@ -1,6 +1,6 @@
 ## Overview
 
-ESMFinder is a protein similarity search tool that leverages embeddings from the ESMC 300M model. It allows users to input a protein sequence and retrieve the top-k most similar proteins from the UniProtKB/Swiss-Prot database, based on the cosine similarity between their ESM embeddings.
+ESMFinder is a protein similarity search tool that leverages embeddings from the ESMC 300M model. It allows users to input a protein sequence and retrieve the top-k most similar proteins from the UniProtKB/Swiss-Prot database, based on the cosine similarity between their ESM embeddings. You can view this project [here](https://storage.googleapis.com/esmfinder/index.html)
 
 ### Technologies Used
 
