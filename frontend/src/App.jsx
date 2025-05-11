@@ -173,7 +173,12 @@ export default function App() {
             height: '100%',
             backgroundColor: 'rgba(255, 255, 255, 0.6)',
             zIndex: 10,
-          }} />
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+            <CircularProgress size={60} thickness={5} color="primary" />
+          </Box>
         )}
         <Container maxWidth="lg" sx={{ mb: 2, px: 2 }}>
           <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
