@@ -13,10 +13,14 @@ ESMFinder is a protein similarity search tool that leverages embeddings from the
 - **Material UI (MUI)**: UI component library for layout and styling
 - **Docker**: Containerization for the backend
 
-## License and Attribution
+## Attribution
 
-This project integrates the ESMC 300M Open Model provided by [EvolutionaryScale](https://www.evolutionaryscale.ai).
+This project is built with the ESMC 300M Open Model provided by [EvolutionaryScale](https://www.evolutionaryscale.ai).
 
-- **Built with ESM**
-- Some outputs may be labeled as **"Generated with ESM"**
-- This software includes components licensed under the [Cambrian Open License Agreement (COLA)](https://www.evolutionaryscale.ai/policies/cambrian-open-license-agreement)
+## License
+
+This project is licensed under the MIT License.
+
+The project incorporates the ESMC 300M Open Model, which is made available under the [Cambrian Open License Agreement (COLA)](https://www.evolutionaryscale.ai/policies/cambrian-open-license-agreement) by EvolutionaryScale.
+
+For complete licensing details, including model attribution and usage requirements, please refer to the [LICENSE](LICENSE) file.
